@@ -1,0 +1,20 @@
+# ai-audit-kit requirements
+# Python 3.11+
+
+# Module 1 — PII Scanner
+presidio-analyzer>=2.2.33
+presidio-anonymizer>=2.2.33
+spacy>=3.7.0
+# After install: python -m spacy download en_core_web_sm
+
+# Terminal formatting (Modules 1–4)
+rich>=13.7.0
+
+# Module 2 — Prompt Guard (live mode, optional)
+# Uncomment the provider(s) you use:
+# anthropic>=0.25.0
+# openai>=1.30.0
+# requests>=2.31.0
+
+# Module 3 & 4 — stdlib only (json, re, os, pathlib)
+# No additional dependencies required
