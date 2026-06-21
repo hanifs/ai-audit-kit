@@ -27,9 +27,7 @@ from typing import Any
 
 # ── Presidio ──────────────────────────────────────────────────────────────────
 try:
-    from presidio_analyzer import AnalyzerEngine, RecognizerResult
-    from presidio_analyzer.predefined_recognizers import PatternRecognizer
-    from presidio_analyzer import Pattern
+    from presidio_analyzer import AnalyzerEngine, RecognizerResult, PatternRecognizer, Pattern
     from presidio_anonymizer import AnonymizerEngine
     from presidio_anonymizer.entities import OperatorConfig
     PRESIDIO_AVAILABLE = True
