@@ -46,6 +46,7 @@ console = Console() if RICH_AVAILABLE else None
 
 DANGEROUS_ACTIONS: list[dict[str, Any]] = [
     {
+        "id":          "ACT-001",
         "pattern":     r"^\*$",
         "label":       "Wildcard (*) — full resource access",
         "severity":    "HIGH",
@@ -55,6 +56,7 @@ DANGEROUS_ACTIONS: list[dict[str, Any]] = [
         "remediation": "Replace * with the specific actions required for the role's purpose.",
     },
     {
+        "id":          "ACT-002",
         "pattern":     r"\*/\*",
         "label":       "Wildcard scope (*/*)  — all resource types",
         "severity":    "HIGH",
@@ -64,6 +66,7 @@ DANGEROUS_ACTIONS: list[dict[str, Any]] = [
         "remediation": "Scope actions to specific resource providers (e.g. Microsoft.Compute/*).",
     },
     {
+        "id":          "ACT-003",
         "pattern":     r"microsoft\.authorization/roleassignments/write",
         "label":       "Role Assignment Write — privilege escalation risk",
         "severity":    "HIGH",
@@ -73,6 +76,7 @@ DANGEROUS_ACTIONS: list[dict[str, Any]] = [
         "remediation": "Remove unless this is a dedicated IAM admin role with strict assignment scope.",
     },
     {
+        "id":          "ACT-004",
         "pattern":     r"microsoft\.authorization/roledefinitions/write",
         "label":       "Role Definition Write — custom role creation risk",
         "severity":    "HIGH",
@@ -82,6 +86,7 @@ DANGEROUS_ACTIONS: list[dict[str, Any]] = [
         "remediation": "Restrict to dedicated IAM governance roles only.",
     },
     {
+        "id":          "ACT-005",
         "pattern":     r"microsoft\.keyvault/vaults/secrets/\*",
         "label":       "Key Vault Secrets Wildcard",
         "severity":    "HIGH",
@@ -91,6 +96,7 @@ DANGEROUS_ACTIONS: list[dict[str, Any]] = [
         "remediation": "Scope to specific secret names or use read-only (secrets/read) where possible.",
     },
     {
+        "id":          "ACT-006",
         "pattern":     r"microsoft\.storage/storageaccounts/\*",
         "label":       "Storage Account Wildcard",
         "severity":    "HIGH",
@@ -100,6 +106,7 @@ DANGEROUS_ACTIONS: list[dict[str, Any]] = [
         "remediation": "Use Storage Blob Data Reader/Contributor scoped to specific containers.",
     },
     {
+        "id":          "ACT-007",
         "pattern":     r"microsoft\.compute/virtualmachines/\*",
         "label":       "Virtual Machine Wildcard",
         "severity":    "MEDIUM",
@@ -109,6 +116,7 @@ DANGEROUS_ACTIONS: list[dict[str, Any]] = [
         "remediation": "Restrict to required VM operations (start/stop/read) only.",
     },
     {
+        "id":          "ACT-008",
         "pattern":     r"microsoft\.insights/\*",
         "label":       "Azure Monitor Wildcard",
         "severity":    "LOW",
@@ -118,6 +126,7 @@ DANGEROUS_ACTIONS: list[dict[str, Any]] = [
         "remediation": "Use Monitoring Reader role for read-only access to metrics and logs.",
     },
     {
+        "id":          "ACT-009",
         "pattern":     r"microsoft\.sql/servers/\*",
         "label":       "SQL Server Wildcard",
         "severity":    "HIGH",
@@ -127,6 +136,7 @@ DANGEROUS_ACTIONS: list[dict[str, Any]] = [
         "remediation": "Scope to specific databases and use SQL DB Contributor where possible.",
     },
     {
+        "id":          "ACT-010",
         "pattern":     r"microsoft\.network/\*",
         "label":       "Network Wildcard",
         "severity":    "MEDIUM",
@@ -331,7 +341,7 @@ def _analyse_rbac(policy: dict) -> list[dict]:
         for rule in DANGEROUS_ACTIONS:
             if re.search(rule["pattern"], action, re.IGNORECASE):
                 findings.append({
-                    "check_id":    rule["pattern"],
+                    "check_id":    rule["id"],
                     "label":       rule["label"],
                     "severity":    rule["severity"],
                     "owasp":       rule.get("owasp", ""),
@@ -776,3 +786,4 @@ if __name__ == "__main__":
     print("Running standalone IAM validation test...")
     run_iam_validation(file_path=tmp, output_dir="reports")
     os.unlink(tmp)
+    
