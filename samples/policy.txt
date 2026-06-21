@@ -1,0 +1,142 @@
+AI Governance Policy — Acme Financial Services
+Version: 1.2 | Effective: January 1, 2024 | Review: Annually
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. PURPOSE AND SCOPE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This policy establishes governance guidelines and principles for the
+responsible use of artificial intelligence systems across Acme Financial
+Services. It applies to all AI use cases including customer-facing
+applications, internal automation, and third-party AI integrations.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. ACCOUNTABILITY AND ROLES & RESPONSIBILITIES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The Chief AI Officer (CAIO) is accountable for AI governance across the
+organisation. A designated AI Review Board owns approval authority for
+all production AI deployments.
+
+Roles and responsibilities are defined in the RACI matrix (Appendix A):
+  - AI Product Owner: accountable for use case definition and business risk
+  - Data Science Lead: responsible for model development and evaluation
+  - Security Engineer: responsible for security controls and access control
+  - Compliance Officer: responsible for regulatory alignment
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. RISK TOLERANCE AND CATEGORISATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Acme maintains a low risk tolerance for high-risk AI applications
+impacting customers or regulated data. All AI systems are classified
+by risk tier prior to deployment:
+
+  - High Risk:   AI decisions affecting credit, employment, or health
+  - Medium Risk: AI-assisted workflows with human review
+  - Low Risk:    Internal productivity tools with no automated decisions
+
+Risk appetite is reviewed quarterly by the AI Review Board. Risk
+thresholds are documented in the Enterprise Risk Register.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. PRIVACY, PII, AND DATA PROTECTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+All AI systems must comply with HIPAA, GDPR, and CCPA where applicable.
+Personal data and personally identifiable information (PII) must be
+minimised at the point of collection and protected throughout the AI
+pipeline. Data protection impact assessments are mandatory for all
+high-risk AI deployments. Sensitive data must not be used in model
+training without explicit legal basis and anonymisation review.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. HUMAN OVERSIGHT AND OVERRELIANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Human-in-the-loop review is mandatory for all automated decisions
+affecting individuals. Human oversight mechanisms must be documented
+for each AI system. Staff must verify AI outputs before acting on
+recommendations. Fact-checking procedures are required for any
+customer-facing AI-generated content to prevent overreliance on
+model outputs and reduce hallucination risk.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. SECURITY CONTROLS AND PROMPT INJECTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+All AI systems must implement:
+  - Access control and authentication for all AI endpoints
+  - Least privilege principles for AI agents and tool integrations
+  - Input sanitization and validation against prompt injection attacks
+  - Output validation and content filtering before rendering to users
+  - Encryption of data in transit and at rest
+
+Sensitive data disclosure controls must prevent AI systems from
+leaking confidential information or PII in responses.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. MONITORING, LOGGING, AND INCIDENT RESPONSE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+All AI systems must implement audit logging and monitoring of model
+inputs, outputs, and decisions. An incident response plan must be
+documented and tested annually. Escalation processes must be defined
+for AI-related breaches, failures, or unexpected model behaviour.
+Incident management procedures align with the enterprise SIEM.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. BIAS, FAIRNESS, AND EVALUATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AI systems must be evaluated for bias and disparate impact across
+demographic groups prior to deployment. Fairness metrics must be
+tracked on an ongoing basis. An evaluation plan with defined
+benchmarks and performance metrics is required for all models.
+Results must be reviewed by the AI Review Board before go-live.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. THIRD-PARTY AI AND VENDOR RISK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Vendor assessments are required before adopting any third-party AI
+models or external providers. Contractual controls must address
+AI-specific risks including data handling, model updates, and
+incident notification. Third-party AI systems are subject to the
+same risk categorisation and review process as internal systems.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. REMEDIATION AND CORRECTIVE ACTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Corrective action and remediation plans must be produced for any
+failed governance checks or audit findings. Risk response procedures
+are defined in the Enterprise Risk Register. All remediation items
+must be tracked to closure with defined owners and deadlines.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. WORKFORCE TRAINING AND AWARENESS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+All staff working with AI systems must complete mandatory AI awareness
+training annually. An employee training program covering responsible
+AI use, bias awareness, and security hygiene is maintained by HR.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. DEPLOYMENT CONTEXT AND DECOMMISSIONING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The operational environment and deployment context must be documented
+for each AI system including data sources, user population, and
+geographic scope. AI systems reaching end-of-life must follow a
+formal decommission and model sunset process to ensure safe retirement
+of models and associated data pipelines.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+APPENDIX A — Document Control
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Owner:    Chief AI Officer
+Approved: AI Review Board
+Review:   Annually (next review: January 2025)
+Version:  1.2

@@ -1,0 +1,25 @@
+{
+  "roleName": "AI Platform Engineer",
+  "description": "",
+  "assignableScopes": [
+    "/subscriptions/00000000-0000-0000-0000-000000000000"
+  ],
+  "permissions": [
+    {
+      "actions": [
+        "*",
+        "Microsoft.Authorization/roleAssignments/write",
+        "Microsoft.KeyVault/vaults/secrets/*",
+        "Microsoft.Storage/storageAccounts/*",
+        "Microsoft.Sql/servers/*"
+      ],
+      "notActions": [
+        "Microsoft.Authorization/*/Delete"
+      ],
+      "dataActions": [
+        "Microsoft.Storage/storageAccounts/blobServices/*"
+      ],
+      "notDataActions": []
+    }
+  ]
+}

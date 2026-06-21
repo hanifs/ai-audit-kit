@@ -1,0 +1,24 @@
+Patient Intake Notes — Confidential
+=====================================
+
+Patient Name:    John Michael Smith
+Date of Birth:   January 15, 1980
+SSN:             123-45-6789
+Phone:           (555) 867-5309
+Email:           john.smith@example.com
+Address:         742 Evergreen Terrace, Springfield, IL 62701
+
+Insurance ID:    BC-998-112-4471
+Credit Card:     4111-1111-1111-1111 (on file for copay)
+Medical License: ML-9988776 (referring physician)
+IP Address:      192.168.1.100 (patient portal login)
+
+Referring Physician: Dr. Jane Doe
+Clinic URL:          https://northwestern-patient-portal.com
+
+Clinical Notes:
+Patient presented with chest pain on 01/20/2024. History of
+hypertension. Referred to cardiology for follow-up. Next
+appointment scheduled for February 3, 2024.
+
+Emergency Contact: Mary Smith, (555) 234-5678, mary.smith@gmail.com

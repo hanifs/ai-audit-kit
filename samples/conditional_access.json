@@ -1,0 +1,22 @@
+{
+  "displayName": "Require MFA for AI Platform Access",
+  "state": "enabled",
+  "conditions": {
+    "users": {
+      "includeUsers": ["All"],
+      "excludeUsers": [],
+      "excludeGroups": []
+    },
+    "applications": {
+      "includeApplications": ["All"]
+    },
+    "signInRiskLevels": ["high", "medium"]
+  },
+  "grantControls": {
+    "operator": "OR",
+    "builtInControls": [
+      "mfa",
+      "requireCompliantDevice"
+    ]
+  }
+}
