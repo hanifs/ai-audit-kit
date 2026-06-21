@@ -28,6 +28,8 @@ from typing import Any
 # ── Presidio ──────────────────────────────────────────────────────────────────
 try:
     from presidio_analyzer import AnalyzerEngine, RecognizerResult
+    from presidio_analyzer.predefined_recognizers import PatternRecognizer
+    from presidio_analyzer import Pattern
     from presidio_anonymizer import AnonymizerEngine
     from presidio_anonymizer.entities import OperatorConfig
     PRESIDIO_AVAILABLE = True
@@ -104,16 +106,86 @@ class PIIScanner:
         self._analyzer = AnalyzerEngine()
         self._anonymizer = AnonymizerEngine()
 
+        # ── Custom SSN recogniser ──────────────────────────────────────────
+        # Presidio sometimes misclassifies SSNs (###-##-####) as DATE_TIME.
+        # This explicit pattern recogniser scores them as US_SSN at 0.95.
+        ssn_pattern = Pattern(
+            name="ssn_pattern",
+            regex=r"\b\d{3}-\d{2}-\d{4}\b",
+            score=0.95,
+        )
+        ssn_recogniser = PatternRecognizer(
+            supported_entity="US_SSN",
+            patterns=[ssn_pattern],
+        )
+        self._analyzer.registry.add_recognizer(ssn_recogniser)
+
+    # ── SSN span helper ───────────────────────────────────────────────────────
+    @staticmethod
+    def _is_ssn_format(text: str, start: int, end: int) -> bool:
+        """Return True if the span matches the ###-##-#### SSN pattern."""
+        span = text[start:end]
+        return bool(re.match(r"^\d{3}-\d{2}-\d{4}$", span))
+
     def analyze(self, text: str) -> list[RecognizerResult]:
-        """Run Presidio analyzer and return all hits above threshold."""
-        results = self._analyzer.analyze(
+        """
+        Run Presidio analyzer and return deduplicated hits above threshold.
+
+        Post-processing fixes:
+          1. DATE_TIME spans that match ###-##-#### are reclassified as US_SSN.
+          2. URL hits that are substrings of an EMAIL_ADDRESS are removed
+             (Presidio often fragments emails into partial URL matches).
+          3. Overlapping spans of the same region keep the highest-confidence hit.
+        """
+        raw = self._analyzer.analyze(
             text=text,
             language="en",
             entities=ALL_ENTITIES,
             score_threshold=self.score_threshold,
         )
-        # Sort by position for clean output
-        return sorted(results, key=lambda r: r.start)
+
+        # ── Fix 1: reclassify SSN-format DATE_TIME spans ──────────────────
+        fixed: list[RecognizerResult] = []
+        for r in raw:
+            if r.entity_type == "DATE_TIME" and self._is_ssn_format(text, r.start, r.end):
+                # Replace with a US_SSN result at higher confidence
+                fixed.append(RecognizerResult(
+                    entity_type="US_SSN",
+                    start=r.start,
+                    end=r.end,
+                    score=0.95,
+                ))
+            else:
+                fixed.append(r)
+
+        # ── Fix 2: remove URL fragments that sit inside an EMAIL span ─────
+        email_spans = [(r.start, r.end) for r in fixed if r.entity_type == "EMAIL_ADDRESS"]
+        cleaned: list[RecognizerResult] = []
+        for r in fixed:
+            if r.entity_type == "URL":
+                # Drop URL if it is fully contained within an email span
+                inside_email = any(
+                    e_start <= r.start and r.end <= e_end
+                    for e_start, e_end in email_spans
+                )
+                if inside_email:
+                    continue
+            cleaned.append(r)
+
+        # ── Fix 3: deduplicate overlapping spans (keep highest score) ─────
+        cleaned.sort(key=lambda r: (r.start, -r.score))
+        deduped: list[RecognizerResult] = []
+        for r in cleaned:
+            # Drop if this span overlaps with an already-kept higher-score result
+            overlaps = any(
+                not (r.end <= kept.start or r.start >= kept.end)
+                for kept in deduped
+                if kept.entity_type != r.entity_type
+            )
+            if not overlaps:
+                deduped.append(r)
+
+        return sorted(deduped, key=lambda r: r.start)
 
     def redact(self, text: str, results: list[RecognizerResult]) -> str:
         """Replace detected entities with [ENTITY_TYPE] placeholder tokens."""
@@ -429,3 +501,4 @@ if __name__ == "__main__":
 
     print("Running standalone PII scan test...")
     run_pii_scan(text=_TEST_TEXT, output_dir="reports", score_threshold=0.35)
+    
