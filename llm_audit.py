@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ai-audit-kit — AI Governance & Security Audit Toolkit
+airadar — AI Governance & Security Audit Toolkit
 ======================================================
 NIST AI RMF · OWASP LLM Top 10 · HIPAA/PII · IAM Policy Validation
 
@@ -35,14 +35,14 @@ console = Console() if RICH_AVAILABLE else None
 __version__ = "0.1.0"
 
 BANNER = r"""
-  ██████╗ ██╗      █████╗ ██╗   ██╗██████╗ ██╗████████╗
- ██╔════╝ ██║     ██╔══██╗██║   ██║██╔══██╗██║╚══██╔══╝
- ██║      ██║     ███████║██║   ██║██║  ██║██║   ██║   
- ██║      ██║     ██╔══██║██║   ██║██║  ██║██║   ██║   
- ╚██████╗ ███████╗██║  ██║╚██████╔╝██████╔╝██║   ██║   
-  ╚═════╝ ╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝   ╚═╝  
-                 ai-audit-kit  v{version}
-    NIST AI RMF · OWASP LLM Top 10 · HIPAA · IAM
+  █████╗  ██╗ ██████╗   █████╗  ██████╗   █████╗  ██████╗ 
+ ██╔══██╗ ██║ ██╔══██╗ ██╔══██╗ ██╔══██╗ ██╔══██╗ ██╔══██╗
+ ███████║ ██║ ██████╔╝ ███████║ ██║  ██║ ███████║ ██████╔╝
+ ██╔══██║ ██║ ██╔══██╗ ██╔══██║ ██║  ██║ ██╔══██║ ██╔══██╗
+ ██║  ██║ ██║ ██║  ██║ ██║  ██║ ██████╔╝ ██║  ██║ ██║  ██║
+ ╚═╝  ╚═╝ ╚═╝ ╚═╝  ╚═╝ ╚═╝  ╚═╝ ╚═════╝  ╚═╝  ╚═╝ ╚═╝  ╚═╝
+                     airadar  v{version}
+       NIST AI RMF · OWASP LLM Top 10 · HIPAA · IAM
 """
 
 
@@ -284,7 +284,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="llm_audit.py",
         description=(
-            "ai-audit-kit: AI Governance & Security Audit Toolkit\n"
+            "airadar: AI Governance & Security Audit Toolkit\n"
             "NIST AI RMF · OWASP LLM Top 10 · HIPAA/PII · IAM Validation\n"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -347,7 +347,7 @@ LIVE MODE (Module 2):
     parser.add_argument(
         "--version", "-v",
         action="version",
-        version=f"ai-audit-kit {__version__}",
+        version=f"airadar {__version__}",
     )
     parser.add_argument(
         "--no-banner",
@@ -401,3 +401,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
