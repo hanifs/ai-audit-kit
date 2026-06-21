@@ -170,11 +170,19 @@ class PIIScanner:
                     continue
             cleaned.append(r)
 
-        # ── Fix 3: deduplicate overlapping spans (keep highest score) ─────
-        cleaned.sort(key=lambda r: (r.start, -r.score))
+        # ── Fix 3: deduplicate — same span + same type (exact duplicates) ──
+        seen_spans: set[tuple] = set()
+        unique: list[RecognizerResult] = []
+        for r in sorted(cleaned, key=lambda r: (r.start, r.end, -r.score)):
+            key = (r.start, r.end, r.entity_type)
+            if key not in seen_spans:
+                seen_spans.add(key)
+                unique.append(r)
+
+        # ── Fix 4: remove overlapping spans (keep highest score) ──────────
+        unique.sort(key=lambda r: (r.start, -r.score))
         deduped: list[RecognizerResult] = []
-        for r in cleaned:
-            # Drop if this span overlaps with an already-kept higher-score result
+        for r in unique:
             overlaps = any(
                 not (r.end <= kept.start or r.start >= kept.end)
                 for kept in deduped
@@ -183,7 +191,21 @@ class PIIScanner:
             if not overlaps:
                 deduped.append(r)
 
-        return sorted(deduped, key=lambda r: r.start)
+        # ── Fix 5: drop stray single-word artifacts (e.g. "Date", "Name") ─
+        # Presidio sometimes emits very short non-PII label words as entities.
+        # Filter out any span under 4 chars that isn't a known short entity type.
+        SHORT_OK = {"URL"}  # entity types where short spans are valid
+        final: list[RecognizerResult] = []
+        for r in deduped:
+            span_text = text[r.start:r.end].strip()
+            if len(span_text) < 4 and r.entity_type not in SHORT_OK:
+                continue
+            # Also drop common false-positive label words
+            if span_text.lower() in {"date", "name", "time", "dob", "ssn", "id"}:
+                continue
+            final.append(r)
+
+        return sorted(final, key=lambda r: r.start)
 
     def redact(self, text: str, results: list[RecognizerResult]) -> str:
         """Replace detected entities with [ENTITY_TYPE] placeholder tokens."""
@@ -304,14 +326,52 @@ def _print_rich(result: dict[str, Any]):
     hipaa_ct   = len(result["hipaa_violations"])
     compliant  = result["is_hipaa_compliant"]
 
+    # ── What we scanned & why it matters ─────────────────────────────────────
+    source     = result.get("source", "inline text")
+    word_count = result.get("word_count", len(result["original_text"].split()))
+
+    use_cases = (
+        "[bold white]What this scan covers:[/bold white]\n"
+        "  This module detects PII and PHI in any text your AI system touches —\n"
+        "  including [cyan]RAG documents[/cyan], [cyan]LLM inputs/outputs[/cyan], "
+        "[cyan]training data[/cyan], [cyan]logs[/cyan], and [cyan]system prompts[/cyan].\n\n"
+        "[bold white]Why it matters for your org:[/bold white]\n"
+        "  If PII flows into an LLM context window undetected, it can be leaked\n"
+        "  in model responses, retained in logs, or exposed to third-party APIs.\n"
+        "  HIPAA §164.514(b)(2) requires Safe Harbor de-identification before\n"
+        "  any PHI is used in AI pipelines, analytics, or shared with vendors."
+    )
+    console.print(Panel(
+        use_cases,
+        title="[bold cyan]ℹ  Why Run This Scan?[/bold cyan]",
+        border_style="dim cyan",
+        padding=(0, 2),
+    ))
+    console.print()
+
+    # ── Scan metadata ─────────────────────────────────────────────────────────
+    meta = (
+        f"[bold]Source:[/bold]              {source}\n"
+        f"[bold]Words scanned:[/bold]       {word_count:,}\n"
+        f"[bold]Characters scanned:[/bold]  {len(result['original_text']):,}\n"
+        f"[bold]Scan timestamp:[/bold]      {result['timestamp'][:19].replace('T', ' ')}\n"
+        f"[bold]Confidence threshold:[/bold] {result['score_threshold']}"
+    )
+    console.print(Panel(
+        meta,
+        title="[bold cyan]Scan Metadata[/bold cyan]",
+        border_style="dim",
+        padding=(0, 2),
+    ))
+    console.print()
+
     # ── Summary panel ────────────────────────────────────────────────────────
     summary_lines = (
         f"[bold]Entities detected:[/bold]    {total}\n"
         f"[bold]Unique entity types:[/bold]  {result['unique_entity_types']}\n"
         f"[bold]HIPAA violations:[/bold]     {hipaa_ct}\n"
         f"[bold]HIPAA Safe Harbor:[/bold]    {'[green]COMPLIANT ✓[/green]' if compliant else '[red]NON-COMPLIANT ✗[/red]'}\n"
-        f"[bold]Overall risk level:[/bold]   [{color}]{_risk_badge(risk)}[/{color}]\n"
-        f"[bold]Confidence threshold:[/bold] {result['score_threshold']}"
+        f"[bold]Overall risk level:[/bold]   [{color}]{_risk_badge(risk)}[/{color}]"
     )
     console.print(Panel(summary_lines, title="[bold cyan]PII Scan Summary[/bold cyan]", border_style="cyan"))
 
@@ -345,7 +405,6 @@ def _print_rich(result: dict[str, Any]):
     console.print()
     console.print("[bold]Redacted output:[/bold]")
     redacted = result["redacted_text"]
-    # Highlight the [ENTITY] tokens
     import re
     highlighted = re.sub(r"(\[[A-Z_]+\])", r"[bold red]\1[/bold red]", redacted)
     console.print(
@@ -368,14 +427,41 @@ def _print_rich(result: dict[str, Any]):
         detail.add_column("HIPAA",       justify="center", min_width=7)
 
         for e in result["entities"]:
+            # Truncate at first newline — Presidio sometimes spans across lines
+            raw_val     = e["text_span"]
+            display_val = raw_val.split("\n")[0].strip()
             detail.add_row(
                 f"{e['start']}–{e['end']}",
                 e["entity_type"],
-                e["text_span"],
+                display_val,
                 f"{e['score']:.3f}",
                 "✓" if e["is_hipaa"] else "—",
             )
         console.print(detail)
+
+    # ── Compliance statement ──────────────────────────────────────────────────
+    console.print()
+    if compliant:
+        console.print(Panel(
+            "[green]✓ HIPAA SAFE HARBOR COMPLIANT[/green]\n\n"
+            "[dim]No PHI identifiers detected in this text. Safe to use in AI pipelines,\n"
+            "RAG ingestion, or share with third-party AI vendors under current threshold.[/dim]",
+            border_style="green",
+            padding=(0, 2),
+        ))
+    else:
+        unique_hipaa = list({e["entity_type"] for e in result["hipaa_violations"]})
+        types_str    = ", ".join(sorted(unique_hipaa))
+        console.print(Panel(
+            f"[red]✗ HIPAA SAFE HARBOR NON-COMPLIANT[/red]\n\n"
+            f"[dim]{hipaa_ct} PHI identifier(s) detected across {len(unique_hipaa)} category type(s):\n"
+            f"  {types_str}\n\n"
+            f"This text must be de-identified before use in AI pipelines, RAG ingestion,\n"
+            f"model training, or sharing with third-party AI vendors.\n"
+            f"Refer to HIPAA §164.514(b)(2) Safe Harbor de-identification standard.[/dim]",
+            border_style="red",
+            padding=(0, 2),
+        ))
 
     console.print()
 
@@ -431,6 +517,7 @@ def run_pii_scan(
     text: str,
     output_dir: str = "reports",
     score_threshold: float = 0.5,
+    source: str = "inline text",
 ):
     """
     Main entrypoint called by llm_audit.py.
@@ -465,6 +552,11 @@ def run_pii_scan(
         console.print("[dim]Running analysis...[/dim]\n")
 
     result = scanner.scan(text)
+
+    # Enrich result with scan metadata for display
+    result["source"]     = source
+    result["word_count"] = len(text.split())
+
     print_pii_results(result)
 
     # Save audit log
